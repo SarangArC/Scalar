@@ -151,7 +151,7 @@ public class ArMeasureActivity extends AppCompatActivity {
         }
     }
 
-    //    OverlayView overlayViewForTest;
+    
     private TextView tv_result;
     private FloatingActionButton fab;
 
