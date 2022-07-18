@@ -76,7 +76,7 @@ class EntryActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         Logger.logStatus("onRequestPermissionsResult()")
         if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-            // Permission denied with checking "Do not ask again".
+            
             CameraPermissionHelper.launchPermissionSettings(this)
         } else {
 
