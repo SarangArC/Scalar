@@ -12,9 +12,7 @@ import android.view.View;
 
 import java.util.HashMap;
 
-/**
- * view for debug
- */
+
 
 public class OverlayView extends View {
 
