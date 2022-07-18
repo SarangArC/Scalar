@@ -10,9 +10,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-/**
- * Created by user on 2017/9/25.
- */
+
 
 public class SquareRenderer {
 
