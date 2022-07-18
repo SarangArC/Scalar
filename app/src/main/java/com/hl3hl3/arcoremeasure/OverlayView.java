@@ -14,7 +14,6 @@ import java.util.HashMap;
 
 /**
  * view for debug
- * Created by rebecca on 2017/10/18.
  */
 
 public class OverlayView extends View {
