@@ -36,7 +36,7 @@ class GLSurfaceRenderer(
     private var viewWidth = 0
     private var viewHeight = 0
 
-    // according to cube.obj, cube diameter = 0.02f
+    //  cube diameter = 0.02f
     private val cubeHitAreaRadius = 0.08f
     private val centerVertexOfCube = floatArrayOf(0f, 0f, 0f, 1f)
     private val vertexResult = FloatArray(4)
@@ -48,13 +48,13 @@ class GLSurfaceRenderer(
 
         Logger.log(TAG, "onSurfaceCreated")
 
-        // Create the texture and pass it to ARCore session to be filled during update().
+        
         backgroundRenderer.createOnGlThread(context)
         if (session != null) {
             session.setCameraTextureName(backgroundRenderer.getTextureId())
         }
 
-        // Prepare the other rendering objects.
+        
         try {
             rectRenderer = RectanglePolygonRenderer()
             cube.createOnGlThread(context, "cube.obj", "cube_green.png")
@@ -86,7 +86,7 @@ class GLSurfaceRenderer(
 
     override fun onDrawFrame(gl: GL10) {
         Logger.log(TAG, "onDrawFrame(), width=$viewWidth, height=$viewHeight")
-        // Clear screen to notify driver it should not load any pixels from previous frame.
+        
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
         if (viewWidth == 0 || viewWidth == 0) {
             return
@@ -94,44 +94,41 @@ class GLSurfaceRenderer(
         if (session == null) {
             return
         }
-        // Notify ARCore session that the view size changed so that the perspective matrix and
-        // the video background can be properly adjusted.
+        
+        
         displayRotationHelper.updateSessionIfNeeded(session)
         try {
             session.setCameraTextureName(backgroundRenderer.getTextureId())
 
-            // Obtain the current frame from ARSession. When the configuration is set to
-            // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-            // camera framerate.
+            
             val frame: Frame = session.update()
             val camera = frame.camera
-            // Draw background.
+            
             backgroundRenderer.draw(frame)
 
-            // If not tracking, don't draw 3d objects.
+            
             if (camera.trackingState == TrackingState.PAUSED) {
                 return
             }
 
-            // Get projection matrix.
+            
             camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f)
 
-            // Get camera matrix and draw.
+            
             camera.getViewMatrix(viewmtx, 0)
 
-            // Compute lighting from average intensity of the image.
+            
             lightIntensity = frame.lightEstimate.pixelIntensity
 
-            // Visualize tracked points.
+            
             val pointCloud = frame.acquirePointCloud()
             this.pointCloud.update(pointCloud)
             this.pointCloud.draw(viewmtx, projmtx)
 
-            // Application is responsible for releasing the point cloud resources after
-            // using it.
+            
             pointCloud.release()
 
-            // Visualize planes.
+            
             planeRenderer.drawPlanes(
                 session.getAllTrackables(Plane::class.java), camera.displayOrientedPose, projmtx
             )
@@ -139,7 +136,7 @@ class GLSurfaceRenderer(
             listener.onFrame(this, frame, camera, viewWidth, viewHeight)
 
         } catch (t: Throwable) {
-            // Avoid crashing the application due to unhandled exceptions.
+           .
             Log.e(TAG, "Exception on the OpenGL thread", t)
         }
 
@@ -147,7 +144,7 @@ class GLSurfaceRenderer(
 
     private var lightIntensity: Float = 0f
 
-    // Temporary matrix allocated here to reduce number of allocations for each frame.
+    
     private val anchorMatrix = FloatArray(16)
 
     private fun drawObject(anchor: Anchor, objectRenderer: ObjectRenderer) {
@@ -189,33 +186,12 @@ class GLSurfaceRenderer(
             return false
         }
         Matrix.multiplyMV(vertexResult, 0, ModelViewProjectionMatrix, 0, centerVertexOfCube, 0)
-        /**
-         * vertexResult = [x, y, z, w]
-         *
-         * coordinates in View
-         * ┌─────────────────────────────────────────┐╮
-         * │[0, 0]                     [viewWidth, 0]│
-         * │       [viewWidth/2, viewHeight/2]       │view height
-         * │[0, viewHeight]   [viewWidth, viewHeight]│
-         * └─────────────────────────────────────────┘╯
-         * ╰                view width               ╯
-         *
-         * coordinates in GLSurfaceView frame
-         * ┌─────────────────────────────────────────┐╮
-         * │[-1.0,  1.0]                  [1.0,  1.0]│
-         * │                 [0, 0]                  │view height
-         * │[-1.0, -1.0]                  [1.0, -1.0]│
-         * └─────────────────────────────────────────┘╯
-         * ╰                view width               ╯
-         */
-        // circle hit test
+        
         val radius = viewWidth / 2 * (cubeHitAreaRadius / vertexResult[3])
         val dx = event.x - viewWidth / 2 * (1 + vertexResult[0] / vertexResult[3])
         val dy = event.y - viewHeight / 2 * (1 - vertexResult[1] / vertexResult[3])
         val distance = Math.sqrt((dx * dx + dy * dy).toDouble())
-        //            // for debug
-//            overlayViewForTest.setPoint("cubeCenter", screenX, screenY);
-//            overlayViewForTest.postInvalidate();
+        
         return distance < radius
     }
 
