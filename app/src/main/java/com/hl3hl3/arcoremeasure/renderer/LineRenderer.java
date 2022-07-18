@@ -9,26 +9,16 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-/**
- *
- * https://stackoverflow.com/questions/16027455/what-is-the-easiest-way-to-draw-line-using-opengl-es-android
- *
- * Created by user on 2017/9/25.
- */
-
 public class LineRenderer {
 
     private final int mProgram;
 
     private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
+            
             "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
                     "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
+                    
                     "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
@@ -68,7 +58,7 @@ public class LineRenderer {
 
     public LineRenderer() {
         // initialize vertex byte buffer for shape coordinates
-        // number ofr coordinate values * 4 bytes per float
+        
         ByteBuffer bb = ByteBuffer.allocateDirect(coordinates.length * 4);
         bb.order(ByteOrder.nativeOrder());  // use the device hardware's native byte order
         vertexBuffer = bb.asFloatBuffer();  // create a floating point buffer from the ByteBuffer
