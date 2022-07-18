@@ -68,7 +68,7 @@ public class ArMeasureActivity extends AppCompatActivity {
 
     private static final int MAX_CUBE_COUNT = 16;
 
-    // Rendering. The Renderers are created here, and initialized when the GL surface is created.
+    
     private GLSurfaceView surfaceView = null;
 
     private boolean installRequested;
@@ -108,7 +108,7 @@ public class ArMeasureActivity extends AppCompatActivity {
             R.id.iv_cube16
     };
 
-    // Tap handling and UI.
+    
     private ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(MAX_CUBE_COUNT);
     private ArrayBlockingQueue<MotionEvent> queuedLongPress = new ArrayBlockingQueue<>(MAX_CUBE_COUNT);
     private final ArrayList<Anchor> anchors = new ArrayList<>();
@@ -218,7 +218,7 @@ public class ArMeasureActivity extends AppCompatActivity {
             public void onClick(View v) {
                 logStatus("click fab");
                 PopupWindow popUp = getPopupWindow();
- // show popup like dropdown list
+ 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     float screenWidth = getResources().getDisplayMetrics().widthPixels;
                     float screenHeight = getResources().getDisplayMetrics().heightPixels;
@@ -246,7 +246,7 @@ public class ArMeasureActivity extends AppCompatActivity {
         }
         surfaceView = findViewById(R.id.surfaceview);
 
-        // Set up tap listener.
+        
         gestureDetector = new GestureDetector(this, gestureDetectorListener);
         surfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -278,7 +278,7 @@ public class ArMeasureActivity extends AppCompatActivity {
                         break;
                 }
 
-                // ARCore requires camera permissions to operate. 
+                //  requires camera permissions to operate. 
                 
                 if (!CameraPermissionHelper.hasCameraPermission(this)) {
                     CameraPermissionHelper.requestCameraPermission(this);
@@ -506,7 +506,7 @@ public class ArMeasureActivity extends AppCompatActivity {
         private int nowTouchingPointIndex = DEFAULT_VALUE;
         private int viewWidth = 0;
         private int viewHeight = 0;
-        // according to cube.obj, cube diameter = 0.02f
+        
         private final float cubeHitAreaRadius = 0.08f;
         private final float[] centerVertexOfCube = {0f, 0f, 0f, 1};
         private final float[] vertexResult = new float[4];
@@ -633,15 +633,15 @@ public class ArMeasureActivity extends AppCompatActivity {
                 
                 Frame frame = session.update();
                 Camera camera = frame.getCamera();
-                // Draw background.
+                
                 backgroundRenderer.draw(frame);
 
-                // If not tracking, don't draw 3d objects.
+                
                 if (camera.getTrackingState() == TrackingState.PAUSED) {
                     return;
                 }
 
-                // Get projection matrix.
+                
                 camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
 
                 
@@ -650,7 +650,7 @@ public class ArMeasureActivity extends AppCompatActivity {
                 
                 final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
-                // Visualize tracked points.
+                
                 PointCloud pointCloud = frame.acquirePointCloud();
                 ArMeasureActivity.this.pointCloud.update(pointCloud);
                 ArMeasureActivity.this.pointCloud.draw(viewmtx, projmtx);
@@ -658,7 +658,7 @@ public class ArMeasureActivity extends AppCompatActivity {
                 
                 pointCloud.release();
 
-                // Check if we detected at least one plane.
+                
                 if (messageSnackbar != null) {
                     for (Plane plane : session.getAllTrackables(Plane.class)) {
                         if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING &&
@@ -669,11 +669,11 @@ public class ArMeasureActivity extends AppCompatActivity {
                     }
                 }
 
-                // Visualize planes.
+                
                 planeRenderer.drawPlanes(
                         session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
 
-                // draw cube & line from last frame
+                
                 if(anchors.size() < 1){
                     
                     showResult("");
@@ -686,11 +686,11 @@ public class ArMeasureActivity extends AppCompatActivity {
                     StringBuilder sb = new StringBuilder();
                     double total = 0;
                     Pose point1;
-                    // draw first cube
+                    
                     Pose point0 = getPose(anchors.get(0));
                     drawObj(point0, cube, viewmtx, projmtx, lightIntensity);
                     checkIfHit(cube, 0);
-                    // draw the rest cube
+                    
                     for(int i = 1; i < anchors.size(); i++){
                         point1 = getPose(anchors.get(i));
                         log("onDrawFrame()", "before drawObj()");
@@ -778,8 +778,7 @@ public class ArMeasureActivity extends AppCompatActivity {
                     Anchor anchor = anchors.remove(nowSelectedIndex);
                     anchor.detach();
                     setPoseDataToTempArray(getPose(anchor));
-//                        log(TAG, "point[" + nowSelectedIndex + "] move vertical "+ (scrollDy / viewHeight) + ", tY=" + tempTranslation[1]
-//                                + ", new tY=" + (tempTranslation[1] += (scrollDy / viewHeight)));
+
                     tempTranslation[1] += (scrollDy / viewHeight);
                     anchors.add(nowSelectedIndex,
                             session.createAnchor(new Pose(tempTranslation, tempRotation)));
@@ -848,7 +847,7 @@ public class ArMeasureActivity extends AppCompatActivity {
 
         private void checkIfHit(ObjectRenderer renderer, int cubeIndex){
             if(isMVPMatrixHitMotionEvent(renderer.getModelViewProjectionMatrix(), queuedLongPress.peek())){
-                // long press hit a cube, show context menu for the cube
+                
                 nowTouchingPointIndex = cubeIndex;
                 queuedLongPress.poll();
                 showMoreAction();
@@ -872,33 +871,12 @@ public class ArMeasureActivity extends AppCompatActivity {
                 return false;
             }
             Matrix.multiplyMV(vertexResult, 0, ModelViewProjectionMatrix, 0, centerVertexOfCube, 0);
-            /**
-             * vertexResult = [x, y, z, w]
-             *
-             * coordinates in View
-             * ┌─────────────────────────────────────────┐╮
-             * │[0, 0]                     [viewWidth, 0]│
-             * │       [viewWidth/2, viewHeight/2]       │view height
-             * │[0, viewHeight]   [viewWidth, viewHeight]│
-             * └─────────────────────────────────────────┘╯
-             * ╰                view width               ╯
-             *
-             * coordinates in GLSurfaceView frame
-             * ┌─────────────────────────────────────────┐╮
-             * │[-1.0,  1.0]                  [1.0,  1.0]│
-             * │                 [0, 0]                  │view height
-             * │[-1.0, -1.0]                  [1.0, -1.0]│
-             * └─────────────────────────────────────────┘╯
-             * ╰                view width               ╯
-             */
-            // circle hit test
+            
             float radius = (viewWidth / 2) * (cubeHitAreaRadius/vertexResult[3]);
             float dx = event.getX() - (viewWidth / 2) * (1 + vertexResult[0]/vertexResult[3]);
             float dy = event.getY() - (viewHeight / 2) * (1 - vertexResult[1]/vertexResult[3]);
             double distance = Math.sqrt(dx * dx + dy * dy);
-//            // for debug
-//            overlayViewForTest.setPoint("cubeCenter", screenX, screenY);
-//            overlayViewForTest.postInvalidate();
+
             return distance < radius;
         }
 
