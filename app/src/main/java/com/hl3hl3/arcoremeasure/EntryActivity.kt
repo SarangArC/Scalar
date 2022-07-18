@@ -64,7 +64,6 @@ class EntryActivity : AppCompatActivity() {
             showMessage(message)
             return
         } else {
-            // TODO go
             startActivity(Intent(this, MeasureActivity::class.java))
         }
     }
